@@ -59,7 +59,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
           <div className="text-center">
             <div className="inline-block mb-4 animate-slide-down">
-              <span className="badge">Digital Library v2.0</span>
+
             </div>
             <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tight animate-slide-up font-inter">
               INTELLI<span className="text-text-muted">LIB</span>

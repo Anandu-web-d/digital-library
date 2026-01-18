@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "IntelliLib AI-Powered Digital Library Frontend",
   "private": true,
+  "type": "module",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -25,4 +26,3 @@
     "preview": "vite preview"
   }
 }
-
