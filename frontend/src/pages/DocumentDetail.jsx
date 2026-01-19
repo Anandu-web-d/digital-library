@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { BACKEND_URL } from '../config/api';
 
 const DocumentDetail = () => {
   const { id } = useParams();
@@ -133,7 +134,7 @@ const DocumentDetail = () => {
 
         <div className="mb-6 flex gap-4">
           <a
-            href={`http://localhost:5000${document.fileUrl}`}
+            href={`${BACKEND_URL}${document.fileUrl}`}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-md font-medium"

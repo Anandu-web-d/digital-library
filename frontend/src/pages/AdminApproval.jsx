@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import { BACKEND_URL } from '../config/api';
 
 const AdminApproval = () => {
   const { user } = useAuth();
@@ -42,7 +43,7 @@ const AdminApproval = () => {
 
   const handleReject = async () => {
     if (!selectedDoc) return;
-    
+
     try {
       await axios.post(`/api/documents/${selectedDoc._id}/reject`, {
         reason: rejectReason,
@@ -160,7 +161,7 @@ const AdminApproval = () => {
                       ✗ Reject
                     </button>
                     <a
-                      href={`http://localhost:5000${doc.fileUrl}`}
+                      href={`${BACKEND_URL}${doc.fileUrl}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"

@@ -27,6 +27,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/documents', require('./routes/documentRoutes'));
 app.use('/api/authors', require('./routes/authorRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
+app.use('/api/verification', require('./routes/verificationRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => {

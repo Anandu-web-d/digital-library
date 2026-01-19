@@ -3,6 +3,9 @@ import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+// AI Service URL - defaults to localhost in development
+const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000';
+
 const Articles = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,21 +58,14 @@ const Articles = () => {
       if (searchQuery.trim()) {
         if (searchType === 'semantic') {
           // Use semantic search - Call Python AI Service
-          // In dev environment, we hit port 8000 directly
           try {
-            const response = await axios.post('http://localhost:8000/api/ai/search', {
+            const response = await axios.post(`${AI_SERVICE_URL}/api/ai/search`, {
               query: searchQuery,
               limit: 12
             });
 
             // Transform AI results to match article structure
             // The AI service returns { id, score, text, metadata }
-
-            // Use the IDs to fetch full article details if needed, 
-            // but for MVP we might just display what we have or mock the object
-
-            // Phase 1 MVP: We might mock the return or mapping
-            // For now let's assume the AI service returns valid data we can map
 
             const mappedArticles = response.data.map(item => ({
               _id: item.id,

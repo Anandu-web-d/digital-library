@@ -38,6 +38,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Refresh user data (useful after verification)
+  const refreshUser = async () => {
+    try {
+      const response = await axios.get('/api/auth/me');
+      setUser(response.data.data);
+      return response.data.data;
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      return null;
+    }
+  };
+
   const login = async (email, password) => {
     try {
       const response = await axios.post('/api/auth/login', { email, password });
@@ -45,6 +57,16 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(userData);
+
+      // Check if email verification is required
+      if (response.data.requiresVerification) {
+        return {
+          success: true,
+          requiresVerification: true,
+          email: userData.email,
+        };
+      }
+
       toast.success('Login successful!');
       return { success: true };
     } catch (error) {
@@ -65,8 +87,15 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(userData);
-      toast.success('Registration successful!');
-      return { success: true };
+
+      // Registration now requires email verification
+      toast.success(response.data.message || 'Registration successful! Please verify your email.');
+
+      return {
+        success: true,
+        requiresVerification: response.data.requiresVerification,
+        email: email,
+      };
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed');
       return { success: false, error: error.response?.data?.message };
@@ -81,9 +110,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      login,
+      register,
+      logout,
+      refreshUser,
+    }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
 

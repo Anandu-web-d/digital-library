@@ -1,5 +1,9 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
+const { generateOTP, sendVerificationEmail } = require('../utils/emailService');
+
+// OTP expiration time (10 minutes)
+const OTP_EXPIRY_MINUTES = 10;
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -18,24 +22,39 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Create user
+    // Generate OTP for email verification
+    const otp = generateOTP();
+    const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+    // Create user with verification OTP
     const user = await User.create({
       name,
       email,
       password,
       role: role || 'student',
+      emailVerificationOTP: otp,
+      emailVerificationExpires: expiresAt,
     });
 
     if (user) {
+      // Send verification email (non-blocking)
+      sendVerificationEmail(email, otp, name).catch(err => {
+        console.error('Failed to send verification email:', err);
+      });
+
       res.status(201).json({
         success: true,
+        message: 'Registration successful! Please verify your email.',
         data: {
           _id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
+          emailVerified: user.emailVerified,
+          verificationStatus: user.verificationStatus,
           token: generateToken(user._id),
         },
+        requiresVerification: true,
       });
     } else {
       res.status(400).json({
@@ -76,6 +95,21 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Update last login
+    user.lastLoginAt = new Date();
+    user.loginHistory.push({
+      ip: req.ip || req.connection.remoteAddress,
+      userAgent: req.headers['user-agent'],
+      timestamp: new Date(),
+    });
+
+    // Keep only last 10 login entries
+    if (user.loginHistory.length > 10) {
+      user.loginHistory = user.loginHistory.slice(-10);
+    }
+
+    await user.save({ validateBeforeSave: false });
+
     res.status(200).json({
       success: true,
       data: {
@@ -83,8 +117,13 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        emailVerified: user.emailVerified,
+        verificationStatus: user.verificationStatus,
+        profileImage: user.profileImage,
+        institution: user.institution,
         token: generateToken(user._id),
       },
+      requiresVerification: !user.emailVerified,
     });
   } catch (error) {
     res.status(500).json({
@@ -99,11 +138,34 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id)
+      .populate('verificationId');
 
     res.status(200).json({
       success: true,
-      data: user,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        emailVerified: user.emailVerified,
+        verificationStatus: user.verificationStatus,
+        profileImage: user.profileImage,
+        institution: user.institution,
+        department: user.department,
+        position: user.position,
+        biography: user.biography,
+        orcidId: user.orcidId,
+        googleScholarId: user.googleScholarId,
+        linkedInProfile: user.linkedInProfile,
+        socialLinks: user.socialLinks,
+        preferences: user.preferences,
+        notifications: user.notifications,
+        savedDocuments: user.savedDocuments,
+        profileComplete: user.profileComplete,
+        lastLoginAt: user.lastLoginAt,
+        createdAt: user.createdAt,
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -112,4 +174,5 @@ exports.getMe = async (req, res) => {
     });
   }
 };
+
 

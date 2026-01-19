@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import Documents from './pages/Documents';
 import DocumentDetail from './pages/DocumentDetail';
@@ -16,6 +17,8 @@ import ArticleDetail from './pages/ArticleDetail';
 import Authors from './pages/Authors';
 import AuthorDetail from './pages/AuthorDetail';
 import AdminApproval from './pages/AdminApproval';
+import ResearcherVerification from './pages/ResearcherVerification';
+import AdminVerificationPanel from './pages/AdminVerificationPanel';
 import Navbar from './components/Navbar';
 
 function App() {
@@ -32,6 +35,7 @@ function App() {
             <Route path="/authors/:id" element={<AuthorDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route
               path="/dashboard"
               element={
@@ -81,10 +85,26 @@ function App() {
               }
             />
             <Route
+              path="/researcher-verification"
+              element={
+                <PrivateRoute>
+                  <ResearcherVerification />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/admin/approval"
               element={
                 <PrivateRoute>
                   <AdminApproval />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/verifications"
+              element={
+                <PrivateRoute>
+                  <AdminVerificationPanel />
                 </PrivateRoute>
               }
             />
@@ -97,4 +117,5 @@ function App() {
 }
 
 export default App;
+
 

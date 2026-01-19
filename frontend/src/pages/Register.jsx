@@ -28,7 +28,12 @@ const Register = () => {
       formData.role
     );
     if (result.success) {
-      navigate('/dashboard');
+      // Redirect to email verification if required
+      if (result.requiresVerification) {
+        navigate('/verify-email', { state: { email: result.email } });
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 

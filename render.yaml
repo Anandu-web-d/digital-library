@@ -2,11 +2,45 @@
 # https://render.com/docs/blueprint-spec
 
 services:
+  # Backend API Service
+  - type: web
+    name: digital-library-backend
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        sync: false  # You'll need to set this manually in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true  # Render will auto-generate a secure secret
+      - key: JWT_EXPIRE
+        value: 7d
+    healthCheckPath: /api/health
+
+  # Frontend Static Site
   - type: web
     name: digital-library
     runtime: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
+    envVars:
+      # These are available at BUILD TIME only for static sites
+      - key: VITE_API_URL
+        fromService:
+          name: digital-library-backend
+          type: web
+          property: host
+      - key: VITE_BACKEND_URL
+        fromService:
+          name: digital-library-backend
+          type: web
+          property: host
     headers:
       - path: /*
         name: Cache-Control
@@ -15,3 +49,4 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+
